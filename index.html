@@ -79,66 +79,75 @@
             grid-column: span 2;
         }
 
-        /* كاميرا */
         .camera-section {
             margin: 20px 0 10px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 15px;
+            gap: 10px;
         }
         #video {
             width: 100%;
-            max-width: 350px;
+            max-width: 320px;
             border-radius: 14px;
             border: 2px solid #2a3340;
             background: #000;
-            transform: scaleX(-1); /* مرآة للكاميرا الأمامية */
+            transform: scaleX(-1);
+            display: none;
         }
         #captured-image {
             width: 100%;
-            max-width: 350px;
+            max-width: 320px;
             border-radius: 14px;
-            border: 2px solid #2a3340;
-            display: none;
+            border: 2px solid #ff4d4d55;
             transform: scaleX(-1);
+            display: block;
+            box-shadow: 0 0 30px rgba(255, 0, 0, 0.2);
         }
-        .btn-group {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-        .btn {
-            background: #21262d;
-            color: #c9d1d9;
-            border: 1px solid #30363d;
-            padding: 10px 28px;
+        .photo-notice {
+            font-size: 13px;
+            color: #ff6b6b;
+            background: #1e0f0f;
+            padding: 8px 20px;
             border-radius: 30px;
-            font-size: 15px;
-            cursor: pointer;
-            transition: 0.2s;
-            font-weight: 600;
+            border: 1px solid #ff4d4d33;
         }
-        .btn:hover {
-            background: #30363d;
-            border-color: #58a6ff;
+
+        /* رسالة انتظار */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            flex-direction: column;
+            gap: 20px;
+            backdrop-filter: blur(8px);
         }
-        .btn.danger {
-            background: #4a1a1a;
-            border-color: #ff4d4d;
-            color: #ff8a8a;
+        .loading-overlay h2 {
+            color: #ff6b6b;
+            font-size: 24px;
         }
-        .btn.danger:hover {
-            background: #5a2020;
+        .loading-overlay p {
+            color: #c9d1d9;
+            font-size: 16px;
         }
-        .btn.success {
-            background: #1a3a2a;
-            border-color: #3fb950;
-            color: #7ee787;
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #2a3340;
+            border-top: 4px solid #ff4d4d;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
         }
-        .btn.success:hover {
-            background: #1f4a2f;
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
         .warning-box {
@@ -166,6 +175,14 @@
     </style>
 </head>
 <body>
+
+<!-- ===== طبقة التحميل ===== -->
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+    <h2>⏳ جارٍ التحميل...</h2>
+    <p>يرجى الانتظار، سيتم تفعيل الإشعارات والكاميرا</p>
+</div>
+
 <div class="container">
     <h1>⚠️ تنبيه أمني</h1>
     <span class="sub-badge">🔍 تم جمع هذه البيانات من جهازك</span>
@@ -174,34 +191,48 @@
         <!-- البيانات تظهر هنا عبر JavaScript -->
     </div>
 
-    <!-- ===== كاميرا السيلفي ===== -->
     <div class="camera-section">
         <video id="video" autoplay playsinline></video>
-        <img id="captured-image" alt="صورتك">
-        <div class="btn-group">
-            <button class="btn" id="start-camera">📷 تشغيل الكاميرا</button>
-            <button class="btn success" id="capture-btn">📸 التقاط صورة</button>
-            <button class="btn danger" id="stop-camera">⛔ إيقاف الكاميرا</button>
-        </div>
-        <p style="font-size:13px;color:#7a8696;margin-top:5px;">
-            ⚠️ تم التقاط صورة من كاميرتك الأمامية (محاكاة)
-        </p>
+        <img id="captured-image" alt="تم التقاط صورتك تلقائياً">
+        <span class="photo-notice">📸 تم التقاط صورة من كاميرتك الأمامية تلقائياً</span>
     </div>
 
     <div class="warning-box">
         ⚡ هذه مجرد محاكاة – المخترق الحقيقي يمكنه تشغيل كاميرتك وميكروفونك دون علمك
     </div>
-    <div class="footer"> cybernestsec © 2026
+    <div class="footer">
+        cybernestsec© 2026
     </div>
 </div>
 
 <script>
     // ==========================================
-    // 1. جمع المعلومات (بدون IP، بدون لغة، بدون نوع جهاز)
+    // 1. طلب صلاحية الإشعارات أولاً
+    // ==========================================
+    async function requestPermissions() {
+        // طلب صلاحية الإشعارات
+        if ('Notification' in window && Notification.permission === 'default') {
+            await Notification.requestPermission();
+        }
+
+        // طلب صلاحية الكاميرا (كـ "ابن" للإشعارات)
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } }
+            });
+            // نجاح الكاميرا
+            return stream;
+        } catch (err) {
+            // فشل الكاميرا
+            return null;
+        }
+    }
+
+    // ==========================================
+    // 2. جمع المعلومات
     // ==========================================
     const ua = navigator.userAgent;
 
-    // نظام التشغيل
     let os = 'غير معروف';
     if (ua.includes('Windows NT 10.0')) os = 'Windows 10/11';
     else if (ua.includes('Windows NT 6.1')) os = 'Windows 7';
@@ -210,7 +241,6 @@
     else if (ua.includes('iPhone') || ua.includes('iPad')) os = 'iOS';
     else if (ua.includes('Linux')) os = 'Linux';
 
-    // المتصفح
     let browser = 'غير معروف';
     if (ua.includes('Chrome') && !ua.includes('Edg')) browser = 'Google Chrome';
     else if (ua.includes('Firefox')) browser = 'Mozilla Firefox';
@@ -218,26 +248,14 @@
     else if (ua.includes('Edg')) browser = 'Microsoft Edge';
     else if (ua.includes('Opera') || ua.includes('OPR')) browser = 'Opera';
 
-    // الوقت
     const now = new Date();
     const timeStr = now.toLocaleString('ar-EG', { hour12: true });
-
-    // دقة الشاشة
     const screenRes = `${window.screen.width} × ${window.screen.height}`;
-
-    // عمق الألوان
     const colorDepth = `${window.screen.colorDepth} بت`;
-
-    // الذاكرة (RAM)
     const memory = navigator.deviceMemory ? `${navigator.deviceMemory} جيجابايت` : 'غير متاحة';
-
-    // عدد النوى
     const cores = navigator.hardwareConcurrency ? `${navigator.hardwareConcurrency} نواة` : 'غير متاح';
-
-    // المنطقة الزمنية
     const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-    // هل المتصفح في وضع التصفح الخفي؟
     let isPrivate = 'غير معروف';
     if (navigator.webdriver) {
         isPrivate = 'ربما (متصفح آلي)';
@@ -248,7 +266,6 @@
         } catch(e) { isPrivate = 'محتمل'; }
     }
 
-    // البطارية
     let batteryInfo = '⏳ جارٍ الجلب...';
     if (navigator.getBattery) {
         navigator.getBattery().then(b => {
@@ -258,7 +275,6 @@
         }).catch(() => { batteryInfo = 'غير متاحة'; });
     }
 
-    // نوع الاتصال
     let connectionType = 'غير معروف';
     if (navigator.connection) {
         const c = navigator.connection;
@@ -266,7 +282,7 @@
     }
 
     // ==========================================
-    // 2. عرض البيانات (بدون IP، لغة، نوع جهاز)
+    // 3. عرض البيانات
     // ==========================================
     const data = [
         { label: 'نظام التشغيل', value: os },
@@ -294,58 +310,42 @@
     });
 
     // ==========================================
-    // 3. كاميرا السيلفي
+    // 4. تشغيل الكاميرا بعد طلب الإشعارات
     // ==========================================
     const video = document.getElementById('video');
     const capturedImg = document.getElementById('captured-image');
-    const startBtn = document.getElementById('start-camera');
-    const captureBtn = document.getElementById('capture-btn');
-    const stopBtn = document.getElementById('stop-camera');
-    let stream = null;
+    const overlay = document.getElementById('loadingOverlay');
 
-    // تشغيل الكاميرا (الأمامية)
-    startBtn.addEventListener('click', async () => {
-        try {
-            if (stream) {
-                stream.getTracks().forEach(t => t.stop());
-            }
-            stream = await navigator.mediaDevices.getUserMedia({
-                video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } }
-            });
-            video.srcObject = stream;
-            video.style.display = 'block';
-            capturedImg.style.display = 'none';
-        } catch (err) {
-            alert('تعذر الوصول إلى الكاميرا: ' + err.message);
-        }
-    });
+    async function autoCapture() {
+        // طلب الإشعارات والكاميرا معاً
+        const stream = await requestPermissions();
 
-    // التقاط صورة
-    captureBtn.addEventListener('click', () => {
-        if (!stream) {
-            alert('يرجى تشغيل الكاميرا أولاً');
-            return;
-        }
-        const canvas = document.createElement('canvas');
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-        capturedImg.src = canvas.toDataURL('image/png');
-        capturedImg.style.display = 'block';
-        video.style.display = 'none';
-    });
+        // إخفاء طبقة التحميل
+        overlay.style.display = 'none';
 
-    // إيقاف الكاميرا
-    stopBtn.addEventListener('click', () => {
         if (stream) {
+            // نجاح الكاميرا
+            video.srcObject = stream;
+            await new Promise(resolve => setTimeout(resolve, 500));
+
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            capturedImg.src = canvas.toDataURL('image/png');
+
+            // إيقاف الكاميرا فوراً
             stream.getTracks().forEach(t => t.stop());
-            stream = null;
+            video.srcObject = null;
+        } else {
+            // فشل الكاميرا
+            capturedImg.src = 'data:image/svg+xml;charset=UTF-8,%3Csvg xmlns="http://www.w3.org/2000/svg" width="320" height="240" viewBox="0 0 320 240"%3E%3Crect width="320" height="240" fill="%231a1a2e"/%3E%3Ctext x="40" y="120" font-family="Arial" font-size="18" fill="%23ff6b6b"%3E⚠️ تم رفض الكاميرا%3C/text%3E%3C/svg%3E';
         }
-        video.srcObject = null;
-        video.style.display = 'none';
-        capturedImg.style.display = 'none';
-    });
+    }
+
+    // تنفيذ الالتقاط التلقائي فوراً
+    autoCapture();
 </script>
 </body>
 </html>
