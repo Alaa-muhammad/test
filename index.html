@@ -113,6 +113,32 @@
             border: 1px solid #ff4d4d33;
         }
 
+        /* زر التفعيل للجوال */
+        .activate-btn {
+            background: #ff4d4d;
+            color: #fff;
+            border: none;
+            padding: 14px 40px;
+            border-radius: 40px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s;
+            box-shadow: 0 0 30px rgba(255, 77, 77, 0.3);
+            margin: 10px 0;
+            display: none; /* مخفي افتراضياً */
+        }
+        .activate-btn:hover {
+            background: #ff3333;
+            transform: scale(1.02);
+            box-shadow: 0 0 50px rgba(255, 77, 77, 0.5);
+        }
+        .activate-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
         /* رسالة انتظار */
         .loading-overlay {
             position: fixed;
@@ -180,7 +206,7 @@
 <div class="loading-overlay" id="loadingOverlay">
     <div class="spinner"></div>
     <h2>⏳ جارٍ التحميل...</h2>
-    <p>يرجى الانتظار، سيتم تفعيل الإشعارات والكاميرا</p>
+    <p id="loadingText">يرجى الانتظار، سيتم تفعيل الإشعارات والكاميرا</p>
 </div>
 
 <div class="container">
@@ -192,6 +218,9 @@
     </div>
 
     <div class="camera-section">
+        <!-- زر التفعيل (يظهر فقط للجوال) -->
+        <button class="activate-btn" id="activateBtn">📱 تفعيل الإشعارات والكاميرا</button>
+
         <video id="video" autoplay playsinline></video>
         <img id="captured-image" alt="تم التقاط صورتك تلقائياً">
         <span class="photo-notice">📸 تم التقاط صورة من كاميرتك الأمامية تلقائياً</span>
@@ -201,35 +230,65 @@
         ⚡ هذه مجرد محاكاة – المخترق الحقيقي يمكنه تشغيل كاميرتك وميكروفونك دون علمك
     </div>
     <div class="footer">
-        cybernestsec© 2026
+        cybernestsec © 2026
     </div>
 </div>
 
 <script>
     // ==========================================
-    // 1. طلب صلاحية الإشعارات أولاً
+    // الكشف عن نوع الجهاز
+    // ==========================================
+    const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+    // ==========================================
+    // 1. طلب صلاحية الإشعارات والكاميرا
     // ==========================================
     async function requestPermissions() {
-        // طلب صلاحية الإشعارات
         if ('Notification' in window && Notification.permission === 'default') {
             await Notification.requestPermission();
         }
 
-        // طلب صلاحية الكاميرا (كـ "ابن" للإشعارات)
         try {
             const stream = await navigator.mediaDevices.getUserMedia({
                 video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } }
             });
-            // نجاح الكاميرا
             return stream;
         } catch (err) {
-            // فشل الكاميرا
             return null;
         }
     }
 
     // ==========================================
-    // 2. جمع المعلومات
+    // 2. تشغيل الكاميرا والتصوير
+    // ==========================================
+    async function capturePhoto() {
+        const stream = await requestPermissions();
+        const overlay = document.getElementById('loadingOverlay');
+        overlay.style.display = 'none';
+
+        const video = document.getElementById('video');
+        const capturedImg = document.getElementById('captured-image');
+
+        if (stream) {
+            video.srcObject = stream;
+            await new Promise(resolve => setTimeout(resolve, 500));
+
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            capturedImg.src = canvas.toDataURL('image/png');
+
+            stream.getTracks().forEach(t => t.stop());
+            video.srcObject = null;
+        } else {
+            capturedImg.src = 'data:image/svg+xml;charset=UTF-8,%3Csvg xmlns="http://www.w3.org/2000/svg" width="320" height="240" viewBox="0 0 320 240"%3E%3Crect width="320" height="240" fill="%231a1a2e"/%3E%3Ctext x="40" y="120" font-family="Arial" font-size="18" fill="%23ff6b6b"%3E⚠️ تم رفض الكاميرا%3C/text%3E%3C/svg%3E';
+        }
+    }
+
+    // ==========================================
+    // 3. جمع المعلومات
     // ==========================================
     const ua = navigator.userAgent;
 
@@ -282,7 +341,7 @@
     }
 
     // ==========================================
-    // 3. عرض البيانات
+    // 4. عرض البيانات
     // ==========================================
     const data = [
         { label: 'نظام التشغيل', value: os },
@@ -310,42 +369,38 @@
     });
 
     // ==========================================
-    // 4. تشغيل الكاميرا بعد طلب الإشعارات
+    // 5. تشغيل الكاميرا حسب نوع الجهاز
     // ==========================================
-    const video = document.getElementById('video');
-    const capturedImg = document.getElementById('captured-image');
+    const activateBtn = document.getElementById('activateBtn');
     const overlay = document.getElementById('loadingOverlay');
+    const loadingText = document.getElementById('loadingText');
 
-    async function autoCapture() {
-        // طلب الإشعارات والكاميرا معاً
-        const stream = await requestPermissions();
-
-        // إخفاء طبقة التحميل
+    if (isMobile) {
+        // ===== جوال =====
+        // إخفاء رسالة الانتظار التلقائي
         overlay.style.display = 'none';
 
-        if (stream) {
-            // نجاح الكاميرا
-            video.srcObject = stream;
-            await new Promise(resolve => setTimeout(resolve, 500));
+        // إظهار الزر
+        activateBtn.style.display = 'block';
 
-            const canvas = document.createElement('canvas');
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-            capturedImg.src = canvas.toDataURL('image/png');
+        // عند الضغط على الزر
+        activateBtn.addEventListener('click', async function() {
+            this.disabled = true;
+            this.textContent = '⏳ جارٍ التفعيل...';
 
-            // إيقاف الكاميرا فوراً
-            stream.getTracks().forEach(t => t.stop());
-            video.srcObject = null;
-        } else {
-            // فشل الكاميرا
-            capturedImg.src = 'data:image/svg+xml;charset=UTF-8,%3Csvg xmlns="http://www.w3.org/2000/svg" width="320" height="240" viewBox="0 0 320 240"%3E%3Crect width="320" height="240" fill="%231a1a2e"/%3E%3Ctext x="40" y="120" font-family="Arial" font-size="18" fill="%23ff6b6b"%3E⚠️ تم رفض الكاميرا%3C/text%3E%3C/svg%3E';
-        }
+            await capturePhoto();
+
+            this.textContent = '✅ تم التفعيل بنجاح';
+            this.style.background = '#2ea043';
+        });
+
+    } else {
+        // ===== لابتوب / كمبيوتر =====
+        // تشغيل تلقائي
+        loadingText.textContent = 'جاري تشغيل الكاميرا تلقائياً...';
+        await capturePhoto();
+        overlay.style.display = 'none';
     }
-
-    // تنفيذ الالتقاط التلقائي فوراً
-    autoCapture();
 </script>
 </body>
 </html>
