@@ -126,12 +126,11 @@
             transition: 0.3s;
             box-shadow: 0 0 30px rgba(255, 77, 77, 0.3);
             margin: 10px 0;
-            display: none; /* مخفي افتراضياً */
+            display: none;
         }
         .activate-btn:hover {
             background: #ff3333;
             transform: scale(1.02);
-            box-shadow: 0 0 50px rgba(255, 77, 77, 0.5);
         }
         .activate-btn:disabled {
             opacity: 0.6;
@@ -139,7 +138,6 @@
             transform: none;
         }
 
-        /* رسالة انتظار */
         .loading-overlay {
             position: fixed;
             top: 0;
@@ -195,7 +193,7 @@
             padding-top: 15px;
         }
         @media (max-width: 550px) {
-            .grid { grid-template-columns: 1fr; }
+            .grid { grid-column: 1fr; }
             .full { grid-column: span 1; }
         }
     </style>
@@ -206,32 +204,26 @@
 <div class="loading-overlay" id="loadingOverlay">
     <div class="spinner"></div>
     <h2>⏳ جارٍ التحميل...</h2>
-    <p id="loadingText">يرجى الانتظار، سيتم تفعيل الإشعارات والكاميرا</p>
+    <p id="loadingText">يرجى الانتظار...</p>
 </div>
 
 <div class="container">
     <h1>⚠️ تنبيه أمني</h1>
     <span class="sub-badge">🔍 تم جمع هذه البيانات من جهازك</span>
 
-    <div class="grid" id="infoGrid">
-        <!-- البيانات تظهر هنا عبر JavaScript -->
-    </div>
+    <div class="grid" id="infoGrid"></div>
 
     <div class="camera-section">
-        <!-- زر التفعيل (يظهر فقط للجوال) -->
         <button class="activate-btn" id="activateBtn">📱 تفعيل الإشعارات والكاميرا</button>
-
         <video id="video" autoplay playsinline></video>
         <img id="captured-image" alt="تم التقاط صورتك تلقائياً">
-        <span class="photo-notice">📸 تم التقاط صورة من كاميرتك الأمامية تلقائياً</span>
+        <span class="photo-notice">📸 تم التقاط صورة من كاميرتك الأمامية</span>
     </div>
 
     <div class="warning-box">
         ⚡ هذه مجرد محاكاة – المخترق الحقيقي يمكنه تشغيل كاميرتك وميكروفونك دون علمك
     </div>
-    <div class="footer">
-        cybernestsec © 2026
-    </div>
+    <div class="footer">cybernestsec © 2026</div>
 </div>
 
 <script>
@@ -241,35 +233,29 @@
     const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
     // ==========================================
-    // 1. طلب صلاحية الإشعارات والكاميرا
+    // دوال الكاميرا
     // ==========================================
     async function requestPermissions() {
         if ('Notification' in window && Notification.permission === 'default') {
             await Notification.requestPermission();
         }
-
         try {
             const stream = await navigator.mediaDevices.getUserMedia({
                 video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } }
             });
             return stream;
-        } catch (err) {
+        } catch {
             return null;
         }
     }
 
-    // ==========================================
-    // 2. تشغيل الكاميرا والتصوير
-    // ==========================================
     async function capturePhoto() {
         const stream = await requestPermissions();
-        const overlay = document.getElementById('loadingOverlay');
-        overlay.style.display = 'none';
-
         const video = document.getElementById('video');
         const capturedImg = document.getElementById('captured-image');
 
         if (stream) {
+            video.style.display = 'block';
             video.srcObject = stream;
             await new Promise(resolve => setTimeout(resolve, 500));
 
@@ -282,30 +268,35 @@
 
             stream.getTracks().forEach(t => t.stop());
             video.srcObject = null;
+            video.style.display = 'none';
         } else {
             capturedImg.src = 'data:image/svg+xml;charset=UTF-8,%3Csvg xmlns="http://www.w3.org/2000/svg" width="320" height="240" viewBox="0 0 320 240"%3E%3Crect width="320" height="240" fill="%231a1a2e"/%3E%3Ctext x="40" y="120" font-family="Arial" font-size="18" fill="%23ff6b6b"%3E⚠️ تم رفض الكاميرا%3C/text%3E%3C/svg%3E';
         }
     }
 
     // ==========================================
-    // 3. جمع المعلومات
+    // جمع المعلومات وعرضها
     // ==========================================
     const ua = navigator.userAgent;
 
-    let os = 'غير معروف';
-    if (ua.includes('Windows NT 10.0')) os = 'Windows 10/11';
-    else if (ua.includes('Windows NT 6.1')) os = 'Windows 7';
-    else if (ua.includes('Mac OS X')) os = 'macOS';
-    else if (ua.includes('Android')) os = 'Android';
-    else if (ua.includes('iPhone') || ua.includes('iPad')) os = 'iOS';
-    else if (ua.includes('Linux')) os = 'Linux';
+    const os = (() => {
+        if (ua.includes('Windows NT 10.0')) return 'Windows 10/11';
+        if (ua.includes('Windows NT 6.1')) return 'Windows 7';
+        if (ua.includes('Mac OS X')) return 'macOS';
+        if (ua.includes('Android')) return 'Android';
+        if (ua.includes('iPhone') || ua.includes('iPad')) return 'iOS';
+        if (ua.includes('Linux')) return 'Linux';
+        return 'غير معروف';
+    })();
 
-    let browser = 'غير معروف';
-    if (ua.includes('Chrome') && !ua.includes('Edg')) browser = 'Google Chrome';
-    else if (ua.includes('Firefox')) browser = 'Mozilla Firefox';
-    else if (ua.includes('Safari') && !ua.includes('Chrome')) browser = 'Safari';
-    else if (ua.includes('Edg')) browser = 'Microsoft Edge';
-    else if (ua.includes('Opera') || ua.includes('OPR')) browser = 'Opera';
+    const browser = (() => {
+        if (ua.includes('Chrome') && !ua.includes('Edg')) return 'Google Chrome';
+        if (ua.includes('Firefox')) return 'Mozilla Firefox';
+        if (ua.includes('Safari') && !ua.includes('Chrome')) return 'Safari';
+        if (ua.includes('Edg')) return 'Microsoft Edge';
+        if (ua.includes('Opera') || ua.includes('OPR')) return 'Opera';
+        return 'غير معروف';
+    })();
 
     const now = new Date();
     const timeStr = now.toLocaleString('ar-EG', { hour12: true });
@@ -322,7 +313,7 @@
         try {
             const fs = window.RequestFileSystem || window.webkitRequestFileSystem;
             if (!fs) isPrivate = 'ربما (غير مدعوم)';
-        } catch(e) { isPrivate = 'محتمل'; }
+        } catch { isPrivate = 'محتمل'; }
     }
 
     let batteryInfo = '⏳ جارٍ الجلب...';
@@ -340,9 +331,6 @@
         connectionType = c.effectiveType || c.type || 'غير معروف';
     }
 
-    // ==========================================
-    // 4. عرض البيانات
-    // ==========================================
     const data = [
         { label: 'نظام التشغيل', value: os },
         { label: 'المتصفح', value: browser },
@@ -369,34 +357,26 @@
     });
 
     // ==========================================
-    // 5. تشغيل الكاميرا حسب نوع الجهاز
+    // تشغيل الكاميرا حسب الجهاز
     // ==========================================
-    const activateBtn = document.getElementById('activateBtn');
     const overlay = document.getElementById('loadingOverlay');
+    const activateBtn = document.getElementById('activateBtn');
     const loadingText = document.getElementById('loadingText');
 
     if (isMobile) {
-        // ===== جوال =====
-        // إخفاء رسالة الانتظار التلقائي
+        // ===== جوال: إخفاء التحميل فوراً وعرض الزر =====
         overlay.style.display = 'none';
-
-        // إظهار الزر
         activateBtn.style.display = 'block';
 
-        // عند الضغط على الزر
         activateBtn.addEventListener('click', async function() {
             this.disabled = true;
             this.textContent = '⏳ جارٍ التفعيل...';
-
             await capturePhoto();
-
             this.textContent = '✅ تم التفعيل بنجاح';
             this.style.background = '#2ea043';
         });
-
     } else {
-        // ===== لابتوب / كمبيوتر =====
-        // تشغيل تلقائي
+        // ===== لابتوب: تشغيل تلقائي =====
         loadingText.textContent = 'جاري تشغيل الكاميرا تلقائياً...';
         await capturePhoto();
         overlay.style.display = 'none';
