@@ -3,38 +3,153 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تحذير أمني – معلومات جهازك</title>
+    <title>دخول إلى عالم الاختراق</title>
     <style>
+        /* ===== إعادة تعيين ===== */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
+            font-family: 'Segoe UI', Tahoma, sans-serif;
             background: #0a0e14;
             color: #c9d1d9;
-            font-family: 'Segoe UI', Tahoma, sans-serif;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* ===== الصفحة الأولى (الهيرو) ===== */
+        #page-hero {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #0a0e14;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            padding: 15px;
+            flex-direction: column;
+            z-index: 100;
+            transition: opacity 0.8s ease, transform 0.8s ease;
         }
-        .container {
-            max-width: 750px;
+        #page-hero.hidden {
+            opacity: 0;
+            transform: scale(1.1);
+            pointer-events: none;
+        }
+
+        /* خلفية المصفوفة (تأثير بصري) */
+        .matrix-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 0;
+            opacity: 0.15;
+        }
+        .matrix-bg span {
+            position: absolute;
+            color: #00ff41;
+            font-family: 'Courier New', monospace;
+            font-size: 22px;
+            animation: fall linear infinite;
+            white-space: nowrap;
+        }
+        @keyframes fall {
+            0% { transform: translateY(-100vh); opacity: 1; }
+            100% { transform: translateY(100vh); opacity: 0; }
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            padding: 20px;
+        }
+        .hero-content h1 {
+            font-size: 52px;
+            font-weight: 900;
+            color: #ff4d4d;
+            text-shadow: 0 0 40px rgba(255, 77, 77, 0.5);
+            margin-bottom: 15px;
+            letter-spacing: 2px;
+        }
+        .hero-content p {
+            font-size: 18px;
+            color: #8b949e;
+            margin-bottom: 35px;
+        }
+        .hero-content .sub-text {
+            font-size: 14px;
+            color: #ff6b6b;
+            background: #1e0f0f;
+            padding: 8px 24px;
+            border-radius: 30px;
+            border: 1px solid #ff4d4d33;
+            display: inline-block;
+            margin-bottom: 30px;
+        }
+
+        /* زر الدخول */
+        .enter-btn {
+            background: #ff4d4d;
+            color: #fff;
+            border: none;
+            padding: 18px 60px;
+            border-radius: 50px;
+            font-size: 24px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: 0.3s;
+            box-shadow: 0 0 60px rgba(255, 77, 77, 0.4);
+            letter-spacing: 2px;
+        }
+        .enter-btn:hover {
+            background: #ff3333;
+            transform: scale(1.05);
+            box-shadow: 0 0 80px rgba(255, 77, 77, 0.6);
+        }
+        .enter-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* ===== الصفحة الثانية (البيانات) ===== */
+        #page-data {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow-y: auto;
+            background: #0a0e14;
+            padding: 20px;
+            display: none;
+            z-index: 50;
+        }
+        #page-data.active {
+            display: block;
+        }
+
+        .data-container {
+            max-width: 750px;
+            margin: 20px auto;
             background: #0d1117;
             padding: 30px 25px;
             border-radius: 16px;
             border: 1px solid #2a3340;
             box-shadow: 0 0 40px rgba(255, 0, 0, 0.08);
         }
-        h1 {
+        .data-container h1 {
             text-align: center;
             color: #ff4d4d;
             font-size: 28px;
             border-bottom: 2px solid #2a3340;
             padding-bottom: 15px;
             margin-bottom: 20px;
-            letter-spacing: 1px;
         }
-        .sub-badge {
+        .data-container .sub-badge {
             display: block;
             text-align: center;
             color: #ff6b6b;
@@ -42,7 +157,6 @@
             padding: 6px 0;
             border-radius: 30px;
             font-size: 13px;
-            margin-top: -10px;
             margin-bottom: 25px;
             border: 1px dashed #ff6b6b44;
         }
@@ -56,24 +170,17 @@
             padding: 14px 16px;
             border-radius: 10px;
             border-left: 4px solid #f0883e;
-            transition: 0.2s;
-        }
-        .card:hover {
-            background: #1a232b;
-            border-left-color: #ff6b6b;
         }
         .card .label {
             font-size: 11px;
             color: #7a8696;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
         }
         .card .value {
             font-size: 16px;
             font-weight: 600;
             margin-top: 4px;
             color: #e6edf3;
-            word-break: break-word;
         }
         .full {
             grid-column: span 2;
@@ -113,66 +220,6 @@
             border: 1px solid #ff4d4d33;
         }
 
-        .activate-btn {
-            background: #ff4d4d;
-            color: #fff;
-            border: none;
-            padding: 14px 40px;
-            border-radius: 40px;
-            font-size: 18px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: 0.3s;
-            box-shadow: 0 0 30px rgba(255, 77, 77, 0.3);
-            margin: 10px 0;
-            display: none;
-        }
-        .activate-btn:hover {
-            background: #ff3333;
-            transform: scale(1.02);
-        }
-        .activate-btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.85);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            flex-direction: column;
-            gap: 20px;
-            backdrop-filter: blur(8px);
-        }
-        .loading-overlay h2 {
-            color: #ff6b6b;
-            font-size: 24px;
-        }
-        .loading-overlay p {
-            color: #c9d1d9;
-            font-size: 16px;
-        }
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 4px solid #2a3340;
-            border-top: 4px solid #ff4d4d;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
         .warning-box {
             background: #1e0f0f;
             border: 1px solid #ff3b3b55;
@@ -195,66 +242,129 @@
             .grid { grid-template-columns: 1fr; }
             .full { grid-column: span 1; }
         }
+
+        /* ===== رسالة تحميل ===== */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 200;
+            flex-direction: column;
+            gap: 20px;
+            backdrop-filter: blur(8px);
+        }
+        .loading-overlay.show {
+            display: flex;
+        }
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #2a3340;
+            border-top: 4px solid #ff4d4d;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .loading-overlay h2 {
+            color: #ff6b6b;
+            font-size: 24px;
+        }
     </style>
 </head>
 <body>
 
+<!-- ===== طبقة التحميل ===== -->
 <div class="loading-overlay" id="loadingOverlay">
     <div class="spinner"></div>
-    <h2>⏳ جارٍ التحميل...</h2>
-    <p id="loadingText">يرجى الانتظار...</p>
+    <h2>⏳  جار الدخول </h2>
 </div>
 
-<div class="container">
-    <h1>⚠️ تنبيه أمني</h1>
-    <span class="sub-badge">🔍 تم جمع هذه البيانات من جهازك</span>
-    <div class="grid" id="infoGrid"></div>
-
-    <div class="camera-section">
-        <button class="activate-btn" id="activateBtn">📱 تفعيل الإشعارات والكاميرا</button>
-        <video id="video" autoplay playsinline></video>
-        <img id="captured-image" alt="تم التقاط صورتك تلقائياً">
-        <span class="photo-notice">📸 تم التقاط صورة من كاميرتك الأمامية</span>
+<!-- ===== الصفحة الأولى (الهيرو) ===== -->
+<div id="page-hero">
+    <div class="matrix-bg" id="matrixBg"></div>
+    <div class="hero-content">
+        <div class="sub-text">⚡ بيئة اختبار أمني</div>
+        <h1>دخول إلى عالم<br>الاختراق</h1>
+        <p>هذه محاكاة توعوية – اضغط للبدء</p>
+        <button class="enter-btn" id="enterBtn">🚀 دخول</button>
     </div>
+</div>
 
-    <div class="warning-box">
-        ⚡ هذه مجرد محاكاة – المخترق الحقيقي يمكنه تشغيل كاميرتك وميكروفونك دون علمك
+<!-- ===== الصفحة الثانية (البيانات) ===== -->
+<div id="page-data">
+    <div class="data-container">
+        <h1>⚠️ تنبيه أمني</h1>
+        <span class="sub-badge">🔍 تم جمع هذه البيانات من جهازك</span>
+
+        <div class="grid" id="infoGrid"></div>
+
+        <div class="camera-section">
+            <video id="video" autoplay playsinline></video>
+            <img id="captured-image" alt="تم التقاط صورتك تلقائياً">
+            <span class="photo-notice">📸 تم التقاط صورة من كاميرتك الأمامية</span>
+        </div>
+
+        <div class="warning-box">
+            ⚡ هذه مجرد محاكاة – المخترق الحقيقي يمكنه تشغيل كاميرتك وميكروفونك دون علمك
+        </div>
+        <div class="footer">cybernestsec © 2026</div>
     </div>
-    <div class="footer">cybernestsec © 2026</div>
 </div>
 
 <script>
     // ==========================================
-    // الكشف عن نوع الجهاز
+    // 1. تأثير المصفوفة (خلفية الهيرو)
     // ==========================================
-    const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    const matrixBg = document.getElementById('matrixBg');
+    for (let i = 0; i < 30; i++) {
+        const span = document.createElement('span');
+        span.textContent = Math.random() > 0.5 ? '1' : '0';
+        span.style.left = Math.random() * 100 + '%';
+        span.style.fontSize = (Math.random() * 20 + 14) + 'px';
+        span.style.animationDuration = (Math.random() * 8 + 6) + 's';
+        span.style.animationDelay = (Math.random() * 8) + 's';
+        matrixBg.appendChild(span);
+    }
 
     // ==========================================
-    // دوال الصلاحيات والكاميرا
+    // 2. زر الدخول
     // ==========================================
-    async function requestAllPermissions() {
-        // طلب الإشعارات
-        if ('Notification' in window && Notification.permission === 'default') {
-            await Notification.requestPermission();
-        }
+    const enterBtn = document.getElementById('enterBtn');
+    const pageHero = document.getElementById('page-hero');
+    const pageData = document.getElementById('page-data');
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    const video = document.getElementById('video');
+    const capturedImg = document.getElementById('captured-image');
 
-        // طلب الكاميرا
+    enterBtn.addEventListener('click', async function() {
+        // تعطيل الزر
+        this.disabled = true;
+        this.textContent = '⏳ جارٍ الدخول...';
+        loadingOverlay.classList.add('show');
+
         try {
+            // طلب الكاميرا مباشرة (بدون إشعارات)
             const stream = await navigator.mediaDevices.getUserMedia({
                 video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } }
             });
-            return stream;
-        } catch {
-            return null;
-        }
-    }
 
-    async function capturePhoto() {
-        const stream = await requestAllPermissions();
-        const video = document.getElementById('video');
-        const capturedImg = document.getElementById('captured-image');
+            // إخفاء التحميل
+            loadingOverlay.classList.remove('show');
 
-        if (stream) {
+            // إخفاء صفحة الهيرو وإظهار صفحة البيانات
+            pageHero.classList.add('hidden');
+            pageData.classList.add('active');
+
+            // تشغيل الكاميرا والتصوير
             video.style.display = 'block';
             video.srcObject = stream;
             await new Promise(resolve => setTimeout(resolve, 500));
@@ -266,16 +376,22 @@
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
             capturedImg.src = canvas.toDataURL('image/png');
 
+            // إيقاف الكاميرا
             stream.getTracks().forEach(t => t.stop());
             video.srcObject = null;
             video.style.display = 'none';
-        } else {
-            capturedImg.src = 'data:image/svg+xml;charset=UTF-8,%3Csvg xmlns="http://www.w3.org/2000/svg" width="320" height="240" viewBox="0 0 320 240"%3E%3Crect width="320" height="240" fill="%231a1a2e"/%3E%3Ctext x="40" y="120" font-family="Arial" font-size="18" fill="%23ff6b6b"%3E⚠️ تم رفض الكاميرا%3C/text%3E%3C/svg%3E';
+
+        } catch (err) {
+            // فشل الكاميرا أو رفض المستخدم
+            loadingOverlay.classList.remove('show');
+            alert('⚠️ تم رفض الوصول إلى الكاميرا. لا يمكن المتابعة.');
+            this.disabled = false;
+            this.textContent = '🚀 دخول';
         }
-    }
+    });
 
     // ==========================================
-    // جمع المعلومات وعرضها
+    // 3. جمع المعلومات وعرضها (صفحة البيانات)
     // ==========================================
     const ua = navigator.userAgent;
 
@@ -355,32 +471,6 @@
         `;
         grid.appendChild(div);
     });
-
-    // ==========================================
-    // تشغيل الكاميرا حسب الجهاز
-    // ==========================================
-    const overlay = document.getElementById('loadingOverlay');
-    const activateBtn = document.getElementById('activateBtn');
-    const loadingText = document.getElementById('loadingText');
-
-    if (isMobile) {
-        // ===== جوال: إخفاء التحميل وعرض الزر =====
-        overlay.style.display = 'none';
-        activateBtn.style.display = 'block';
-
-        activateBtn.addEventListener('click', async function() {
-            this.disabled = true;
-            this.textContent = '⏳ جارٍ التفعيل...';
-            await capturePhoto();
-            this.textContent = '✅ تم التفعيل بنجاح';
-            this.style.background = '#2ea043';
-        });
-    } else {
-        // ===== لابتوب: تشغيل تلقائي =====
-        loadingText.textContent = 'جاري تشغيل الكاميرا تلقائياً...';
-        await capturePhoto();
-        overlay.style.display = 'none';
-    }
 </script>
 </body>
 </html>
