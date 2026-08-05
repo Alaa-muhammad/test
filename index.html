@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تحذير أمني – معلومات جهازك</title>
+    <title>تحذير أمني - معلومات جهازك</title>
     <style>
+        /* === التصميم العام === */
         * {
             margin: 0;
             padding: 0;
@@ -12,38 +13,49 @@
         }
         body {
             background: #0a0e14;
-            color: #e6edf3;
-            font-family: 'Segoe UI', Tahoma, sans-serif;
-            padding: 20px;
+            color: #c9d1d9;
+            font-family: 'Courier New', monospace;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
+            padding: 15px;
         }
         .container {
-            max-width: 700px;
+            max-width: 800px;
             width: 100%;
-            background: #131a20;
-            border-radius: 20px;
+            background: #0d1117;
             padding: 30px 25px;
+            border-radius: 12px;
             border: 1px solid #2a3340;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+            box-shadow: 0 0 30px rgba(255, 0, 0, 0.15);
         }
+
+        /* === العناوين === */
         h1 {
             text-align: center;
-            font-size: 30px;
-            color: #ff6b6b;
+            color: #ff3b3b;
+            font-size: 28px;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px #ff3b3b55;
             border-bottom: 2px solid #2a3340;
             padding-bottom: 15px;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
         }
-        .sub {
+        .sub-badge {
+            display: block;
             text-align: center;
-            font-size: 14px;
-            color: #b0b9c5;
-            margin-top: -15px;
+            color: #ff6b6b;
+            background: #1e1a2b;
+            padding: 6px 0;
+            border-radius: 30px;
+            font-size: 13px;
+            margin-top: -10px;
             margin-bottom: 25px;
+            border: 1px dashed #ff6b6b44;
         }
+
+        /* === الشبكة === */
         .grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -52,16 +64,17 @@
         .card {
             background: #0f161c;
             padding: 14px 16px;
-            border-radius: 12px;
+            border-radius: 8px;
             border-left: 4px solid #f0883e;
             transition: 0.2s;
         }
         .card:hover {
             background: #1a232b;
+            border-left-color: #ff6b6b;
         }
         .card .label {
-            font-size: 12px;
-            color: #88929e;
+            font-size: 11px;
+            color: #7a8696;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
@@ -75,6 +88,7 @@
         .card .value.ip {
             color: #58a6ff;
             font-family: monospace;
+            font-size: 17px;
         }
         .card .value.danger {
             color: #ff6b6b;
@@ -82,34 +96,31 @@
         .full {
             grid-column: span 2;
         }
+
+        /* === تحذير === */
         .warning-box {
-            background: #1e1a2b;
-            border: 1px solid #ff6b6b44;
-            border-radius: 12px;
-            padding: 16px;
+            background: #1e0f0f;
+            border: 1px solid #ff3b3b55;
+            border-radius: 10px;
+            padding: 15px;
             margin: 20px 0 10px;
             text-align: center;
-            color: #ffa07a;
+            color: #ff8a8a;
             font-size: 15px;
         }
+
+        /* === تذييل === */
         .footer {
             text-align: center;
             font-size: 12px;
-            color: #5a6a7a;
+            color: #4a5a6a;
             margin-top: 20px;
-            border-top: 1px solid #1e2a33;
+            border-top: 1px solid #1a222a;
             padding-top: 15px;
         }
-        .badge {
-            display: inline-block;
-            background: #ff6b6b22;
-            padding: 2px 14px;
-            border-radius: 30px;
-            font-size: 12px;
-            color: #ff6b6b;
-            margin-bottom: 8px;
-        }
-        @media (max-width: 500px) {
+
+        /* === جوال === */
+        @media (max-width: 550px) {
             .grid {
                 grid-template-columns: 1fr;
             }
@@ -121,15 +132,15 @@
 </head>
 <body>
 <div class="container">
-    <h1>🛡️ تنبيه أمني</h1>
-    <div class="sub"><span class="badge">🔍 تم جمع هذه البيانات من جهازك دون إذنك</span></div>
+    <h1>⚠️ تنبيه أمني</h1>
+    <span class="sub-badge">🔍 تم جمع هذه البيانات من جهازك دون علمك</span>
 
     <div class="grid" id="infoGrid">
-        <!-- سيتم ملء البطاقات بواسطة JavaScript -->
+        <!-- البيانات تظهر هنا عبر JavaScript -->
     </div>
 
     <div class="warning-box">
-        ⚠️ هذه مجرد محاكاة – المخترق الحقيقي يمكنه جمع معلومات أكثر (ملفات تعريف الارتباط، كلمات المرور، الموقع الجغرافي، والكاميرا)
+        ⚡ هذه مجرد محاكاة – المخترق الحقيقي يستطيع جمع ملفاتك، وكلمات مرورك، وموقعك، والتجسس على كاميرتك وميكروفونك.
     </div>
     <div class="footer">
         ورشة الأمن السيبراني – جميع الحقوق محفوظة © 2026
@@ -137,10 +148,12 @@
 </div>
 
 <script>
-    // ====== جمع المعلومات ======
+    // ==========================================
+    // 1. جمع المعلومات
+    // ==========================================
     const ua = navigator.userAgent;
 
-    // 1. نظام التشغيل
+    // نظام التشغيل
     let os = 'غير معروف';
     if (ua.includes('Windows NT 10.0')) os = 'Windows 10/11';
     else if (ua.includes('Windows NT 6.1')) os = 'Windows 7';
@@ -149,7 +162,7 @@
     else if (ua.includes('iPhone') || ua.includes('iPad')) os = 'iOS';
     else if (ua.includes('Linux')) os = 'Linux';
 
-    // 2. المتصفح
+    // المتصفح
     let browser = 'غير معروف';
     if (ua.includes('Chrome') && !ua.includes('Edg')) browser = 'Google Chrome';
     else if (ua.includes('Firefox')) browser = 'Mozilla Firefox';
@@ -157,48 +170,63 @@
     else if (ua.includes('Edg')) browser = 'Microsoft Edge';
     else if (ua.includes('Opera') || ua.includes('OPR')) browser = 'Opera';
 
-    // 3. نوع الجهاز
+    // نوع الجهاز
     const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(ua);
     const device = isMobile ? '📱 جوال / جهاز لوحي' : '💻 كمبيوتر / لابتوب';
 
-    // 4. اللغة
+    // اللغة
     const lang = navigator.language || navigator.languages?.[0] || 'غير معروف';
 
-    // 5. الوقت والتاريخ
+    // الوقت
     const now = new Date();
     const timeStr = now.toLocaleString('ar-EG', { hour12: true });
 
-    // 6. دقة الشاشة
+    // دقة الشاشة
     const screenRes = `${window.screen.width} × ${window.screen.height}`;
 
-    // 7. عمق الألوان
+    // عمق الألوان
     const colorDepth = `${window.screen.colorDepth} بت`;
 
-    // 8. ذاكرة المتصفح (إن وجدت)
+    // الذاكرة (RAM)
     const memory = navigator.deviceMemory ? `${navigator.deviceMemory} جيجابايت` : 'غير متاحة';
 
-    // 9. عدد النوى (إن وجد)
+    // عدد النوى
     const cores = navigator.hardwareConcurrency ? `${navigator.hardwareConcurrency} نواة` : 'غير متاح';
 
-    // 10. وقت المنطقة الزمنية
+    // المنطقة الزمنية
     const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-    // 11. هل الجهاز يعمل بالبطارية؟ (معلومة متقدمة)
-    let batteryInfo = 'غير متاحة';
-    if (navigator.getBattery) {
-        navigator.getBattery().then(b => {
-            document.getElementById('battery').textContent = `${Math.round(b.level * 100)}% (${b.charging ? '🔌 شحن' : '🔋 بطارية'})`;
-        }).catch(() => {});
+    // هل المتصفح في وضع التصفح الخفي (Incognito)؟
+    let isPrivate = 'غير معروف';
+    if (navigator.webdriver) {
+        isPrivate = 'ربما (متصفح آلي)';
+    } else {
+        try {
+            const fs = window.RequestFileSystem || window.webkitRequestFileSystem;
+            if (!fs) isPrivate = 'ربما (غير مدعوم)';
+        } catch(e) { isPrivate = 'محتمل'; }
     }
 
-    // 12. نوع الاتصال (تقريبي)
+    // معلومات البطارية
+    let batteryInfo = '⏳ جارٍ الجلب...';
+    if (navigator.getBattery) {
+        navigator.getBattery().then(b => {
+            batteryInfo = `${Math.round(b.level * 100)}% (${b.charging ? '🔌 شحن' : '🔋 بطارية'})`;
+            const el = document.getElementById('battery');
+            if (el) el.textContent = batteryInfo;
+        }).catch(() => { batteryInfo = 'غير متاحة'; });
+    }
+
+    // نوع الاتصال
     let connectionType = 'غير معروف';
     if (navigator.connection) {
         const c = navigator.connection;
         connectionType = c.effectiveType || c.type || 'غير معروف';
     }
 
-    // ====== عرض المعلومات ======
+    // ==========================================
+    // 2. عرض البيانات
+    // ==========================================
     const data = [
         { label: 'نظام التشغيل', value: os, cls: '' },
         { label: 'المتصفح', value: browser, cls: '' },
@@ -207,11 +235,12 @@
         { label: 'التوقيت المحلي', value: timeStr, cls: '' },
         { label: 'دقة الشاشة', value: screenRes, cls: '' },
         { label: 'عمق الألوان', value: colorDepth, cls: '' },
-        { label: 'الذاكرة المتاحة', value: memory, cls: '' },
+        { label: 'الذاكرة (RAM)', value: memory, cls: '' },
         { label: 'عدد النوى', value: cores, cls: '' },
         { label: 'المنطقة الزمنية', value: timezone, cls: '' },
         { label: 'نوع الاتصال', value: connectionType, cls: '' },
-        { label: 'البطارية', value: '⏳ جارٍ الجلب...', cls: '', id: 'battery' }
+        { label: 'وضع التصفح', value: isPrivate, cls: '' },
+        { label: 'البطارية', value: batteryInfo, cls: '', id: 'battery' }
     ];
 
     const grid = document.getElementById('infoGrid');
@@ -225,7 +254,9 @@
         grid.appendChild(div);
     });
 
-    // ====== جلب الـ IP ======
+    // ==========================================
+    // 3. جلب الـ IP
+    // ==========================================
     fetch('https://api.ipify.org?format=json')
         .then(r => r.json())
         .then(d => {
@@ -248,14 +279,6 @@
             `;
             grid.appendChild(ipCard);
         });
-
-    // ====== تحديث البطارية بعد ثانية ======
-    if (navigator.getBattery) {
-        navigator.getBattery().then(b => {
-            const el = document.getElementById('battery');
-            if (el) el.textContent = `${Math.round(b.level * 100)}% (${b.charging ? '🔌 شحن' : '🔋 بطارية'})`;
-        }).catch(() => {});
-    }
 </script>
 </body>
 </html>
